@@ -1,0 +1,62 @@
+,source_name,ID,source_num,Gene_sub_group
+44,BMP2,Gene,79,BMP
+47,BMPER,Gene,80,BMP
+50,BMPR2,Gene,81,BMP
+56,BMPR1A,Gene,82,BMP
+57,BMPR1B,Gene,83,BMP
+71,BMP3,Gene,84,BMP
+85,BMP2K,Gene,85,BMP
+96,BMP4,Gene,86,BMP
+99,BMP6,Gene,87,BMP
+40,RORA,Gene,88,Circadian
+55,ARNTL2,Gene,89,Circadian
+58,NR1D2,Gene,90,Circadian
+63,CLOCK,Gene,91,Circadian
+64,RORC,Gene,92,Circadian
+66,NPAS2,Gene,93,Circadian
+81,RORB,Gene,94,Circadian
+43,SLC5A7,Gene,38,Core
+59,COLQ,Gene,39,Core
+88,BCHE,Gene,40,Core
+53,NKX2-1,Gene,61,Development
+61,LHX6,Gene,62,Development
+73,LHX8,Gene,63,Development
+78,ISL1,Gene,64,Development
+93,GBX2,Gene,65,Development
+41,JAK2,Gene,66,Differentiation
+45,STAT5A,Gene,67,Differentiation
+48,STAT5B,Gene,68,Differentiation
+65,STAT3,Gene,69,Differentiation
+87,STAT1,Gene,70,Differentiation
+39,SLC12A2,Gene,95,Extended
+46,DYRK1A,Gene,96,Extended
+70,GPCPD1,Gene,97,Extended
+92,HNRNPH1,Gene,98,Extended
+86,LIF,Gene,59,Neurokine
+89,IL6,Gene,60,Neurokine
+42,LIFR,Gene,54,Neurokine Receptor
+54,IL6R,Gene,55,Neurokine Receptor
+62,IL6ST,Gene,56,Neurokine Receptor
+68,CNTFR,Gene,57,Neurokine Receptor
+97,BDNF,Gene,58,Neurotrophic Factor
+75,NTRK2,Gene,53,Neurotrophic Receptor
+49,CHRM5,Gene,41,Receptor
+52,CHRNA5,Gene,42,Receptor
+60,CHRNB2,Gene,43,Receptor
+67,CHRM2,Gene,44,Receptor
+76,CHRNA10,Gene,45,Receptor
+77,CHRNA3,Gene,46,Receptor
+79,CHRNA4,Gene,47,Receptor
+80,CHRM1,Gene,48,Receptor
+84,CHRM3,Gene,49,Receptor
+91,CHRNA7,Gene,50,Receptor
+94,CHRNA2,Gene,51,Receptor
+95,CHRNA9,Gene,52,Receptor
+51,SRSF12,Gene,71,Splicing
+69,SRSF6,Gene,72,Splicing
+72,SRSF7,Gene,73,Splicing
+74,SRSF10,Gene,74,Splicing
+82,SRSF1,Gene,75,Splicing
+83,SRSF2,Gene,76,Splicing
+90,SRSF8,Gene,77,Splicing
+98,SRSF11,Gene,78,Splicing
