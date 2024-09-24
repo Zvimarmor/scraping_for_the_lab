@@ -13,25 +13,64 @@ import time
 
 
 
-trfs = set()
+def get_trfs_list(file_path):
+    """
+    Get the list of tRFs from the given file.
+    :param file_path: The path to the file containing the tRFs.
+    :return: A set of tRFs.
+    """
+    trfs = set()
 
-# Check if the file exists first
-file_path = 'conclusion_TRFs.txt'
-if os.path.exists(file_path):
-    with open(file_path, 'r') as f:
-        current_line = f.readlines()
-        current_line = [x.strip() for x in current_line]  # Strip whitespace from each line
+    # Check if the file exists first
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            current_line = f.readlines()
+            current_line = [x.strip() for x in current_line]  # Strip whitespace from each line
 
-        # Split the lines into words and check for 'tRF' in each word
-        for line in current_line:
-            words = line.split()
-            for word in words:
-                if 'tRF' in word and word[0:3] == 'tRF' and len(word) > 5:
-                    word.replace("'", "")
-                    word.replace(" ", "")
-                    word.replace('"', "")
-                    trfs.add(word)
-                    print(word)
+            # Split the lines into words and check for 'tRF' in each word
+            for line in current_line:
+                words = line.split()
+                for word in words:
+                    if 'tRF' in word and word[0:3] == 'tRF' and len(word) > 5:
+                        word.replace("'", "")
+                        word.replace(" ", "")
+                        word.replace('"', "")
+                        trfs.add(word)
+        return trfs
+
+    else:
+        warnings.warn('The file does not exist. Please check the file path.')
+        return None
+
+def get_miRNA_list(file_path):
+    """
+    Get the list of miRNAs from the given file.
+    :param file_path: The path to the file containing the miRNAs.
+    :return: A set of miRNAs.
+    """
+    mirnas = set()
+
+    # Check if the file exists first
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            current_line = f.readlines()
+            current_line = [x.strip() for x in current_line]  # Strip whitespace from each line
+
+            # Split the lines into words and check for 'miR' in each word
+            for line in current_line:
+                words = line.split()
+                for word in words:
+                    if 'miR' in word and len(word) > 5 and word[4:7] == 'miR':
+                        word.replace("'", "")
+                        word.replace(" ", "")
+                        word.replace('"', "")
+                        mirnas.add(word)
+        return mirnas
+
+    else:
+        warnings.warn('The file does not exist. Please check the file path.')
+        return None
+    
 
 
 def check_genes_for_tRFs(tRFs):
@@ -98,10 +137,15 @@ def check_genes_for_tRFs(tRFs):
         page += 1
         driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div[1]/div[3]/div[2]/ul/li[' + str(page) + ']/a').click()  
 
-    print(genes_dict)
+
 
 if __name__ == '__main__':
-    check_genes_for_tRFs(trfs)
+    # trf_list = get_trfs_list('conclusion_TRFs.txt')
+    # check_genes_for_tRFs(trfs)
+    mirna_list = get_miRNA_list('conclusion_miRNA.txt')
+    for i in mirna_list:
+        print(i)
+
 
 
 
