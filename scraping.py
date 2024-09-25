@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 import os
 import warnings
 import multiprocessing as mp
@@ -72,8 +73,7 @@ def get_miRNA_list(file_path):
         return None
     
 
-
-def check_genes_for_tRFs(tRFs):
+def check_genes_for_tRFs(tRFs,output_file, if_save=False):
     """
     Checks the genes for the given tRFs.
     :param tRFs: A set of tRFs to check.
@@ -81,7 +81,9 @@ def check_genes_for_tRFs(tRFs):
     """
     genes_dict = {}
 
-    driver = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get('http://www.rnanut.net/tRFTar/')
     driver.implicitly_wait(10)
 
@@ -131,21 +133,63 @@ def check_genes_for_tRFs(tRFs):
                     if trf not in genes_dict:
                         genes_dict[trf] = []
                     search_results = driver.find_element(By.XPATH, '//*[@id="search-table"]/tbody/tr[' + str(i) + ']/td[3]/a')
-                    genes_dict[trf].append(search_results.text)
+                    gene = search_results.text
+                    search_results = driver.find_element(By.XPATH, '//*[@id="search-table"]/tbody/tr[' + str(i) + ']/td[6]')
+                    score = search_results.text
+                    genes_dict[trf].append((gene, score))
+
             except:
                 break
         page += 1
+        time.sleep(2)
         driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div[1]/div[3]/div[2]/ul/li[' + str(page) + ']/a').click()  
+    
+    if if_save:
+        with open(output_file, 'w') as f:
+            f.write('tRF gene score' + '\n')
+            for trf in genes_dict:
+                for gene in genes_dict[trf]:
+                    f.write(trf + ' ' + gene[0] + ' ' + gene[1] + '\n')
 
+    return genes_dict
 
+def check_genes_for_miRNAs(miRNAs, output_file, if_save=False):
+    """
+    Checks the genes for the given miRNAs.
+    :param miRNAs: A set of miRNAs to check.
+    :return: A list of genes.
+    """
+    genes_dict = {}
+
+    # chrome_options = webdriver.ChromeOptions()
+    # chrome_options.add_argument('--headless')
+    # driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome()
+    driver.get('https://google.com')
+    # driver.get('https://ophid.utoronto.ca/mirDIP/index.jsp#r')
+    driver.implicitly_wait(10)
+
+    print('driver.current_url)')
+
+    search_box = driver.find_element(By.ID, 'idMicroRna')
+    search_box.send_keys(','.join(miRNAs))
+    driver.find_element(By.ID, 'submitbutton').click()
+
+    if if_save:
+        with open(output_file, 'w') as f:
+            f.write('miRNA gene' + '\n')
+            for miRna in genes_dict:
+                for gene in genes_dict[miRna]:
+                    f.write(miRna + ' ' + gene + '\n')
 
 if __name__ == '__main__':
-    # trf_list = get_trfs_list('conclusion_TRFs.txt')
-    # check_genes_for_tRFs(trfs)
-    mirna_list = get_miRNA_list('conclusion_miRNA.txt')
-    for i in mirna_list:
-        print(i)
-
+    trf_list = get_trfs_list('conclusion_TRFs.txt')
+    check_genes_for_tRFs(trf_list, 'conclusion_TRFs_genes.txt', if_save=True)
+    # mirna_list = get_miRNA_list('conclusion_miRNA.txt')
+    # for mirna in mirna_list:
+    #     print(mirna)
+    #print(check_genes_for_miRNAs(mirna_list))
+   
 
 
 
