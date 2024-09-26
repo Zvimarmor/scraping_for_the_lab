@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
+import threading
+import sys
 import os
 import warnings
 import multiprocessing as mp
@@ -215,12 +217,108 @@ def check_genes_for_miRNAs(miRNAs, output_file='conclusion_miRNAs_genes', if_sav
 
     return genes_dict
 
-if __name__ == '__main__':
-    trf_list = get_trfs_set('tRF_AD_Meitar_030924.csv')
-    check_genes_for_tRFs(trf_list, 'conclusion_TRFs_genes.csv', if_save=True)
-    mirna_list = ['hsa-miR-125a-5p', 'hsa-miR-146a', 'hsa-miR-150-5p', 'hsa-miR-191-5p', 'hsa-miR-199a-3p', 'hsa-miR-200a', 'hsa-miR-203a-3p', 'hsa-miR-223-3p', 'hsa-miR-372', 'hsa-miR-375', 'hsa-miR-499a-5p', 'hsa-miR-663b', 'hsa-miR-885-5p']
-    check_genes_for_miRNAs(mirna_list, if_save=True)
-        
+def loading_spinner():
+    """Function to display a loading spinner."""
+    spinner = ['-', '\\', '|', '/']
+    while not stop_event.is_set():
+        for symbol in spinner:
+            sys.stdout.write(f'\rProcessing... {symbol}')
+            sys.stdout.flush()
+            time.sleep(0.1)
 
+if __name__ == '__main__':
+    print('What would you like to do?')
+    print('1. Check genes for tRFs')
+    print('2. Check genes for miRNAs')
+    print('3. Check genes for both tRFs and miRNAs')
+    choice = input('Enter your choice: ')
+
+     # Create an Event for stopping the spinner
+    stop_event = threading.Event()
+
+    try:
+        if choice == '1':
+            print('The input file should be a csv file with the tRFs in the first column.')
+            trf_file = input('Enter the path to the tRF file: ')
+            if not os.path.exists(trf_file):
+                raise FileNotFoundError('The file does not exist. Please check the file path.')
+            trf_list = get_trfs_set(trf_file) 
+
+            spinner_thread = threading.Thread(target=loading_spinner) # Start the loading spinner thread
+            spinner_thread.start()
+
+            genes_dict = check_genes_for_tRFs(trf_list, if_save=True)
+
+        elif choice == '2':
+            print('The input file should be a csv file with the miRNAs in the first column.')
+            mirna_file = input('Enter the path to the miRNA file: ')
+            if not os.path.exists(mirna_file):
+                raise FileNotFoundError('The file does not exist. Please check the file path.')
+
+            min_score = input('Enter the minimum score for the miRNA-gene interaction (default is 0.8): ')
+            if not min_score:
+                min_score = 0.8
+            mirna_list = get_miRNA_set(mirna_file)
         
+            spinner_thread = threading.Thread(target=loading_spinner) # Start the loading spinner thread
+            spinner_thread.start()
+
+            genes_dict = check_genes_for_miRNAs(mirna_list, if_save=True, min_score=float(min_score))
+    
+        elif choice == '3':
+            gene_dict_of_all = {}
+
+            print('The input files should be:\n 1.csv file with the tRFs in the first column and\n 2. csv file with the miRNAs in the first column.')
+            trf_file = input('Enter the path to the tRF file: ')
+            if not os.path.exists(trf_file):
+                raise FileNotFoundError('The file does not exist. Please check the file path.')
+            mirna_file = input('Enter the path to the miRNA file: ')
+            if not os.path.exists(mirna_file):
+                raise FileNotFoundError('The file does not exist. Please check the file path.')
+
+            spinner_thread = threading.Thread(target=loading_spinner) # Start the loading spinner thread
+            spinner_thread.start()
+            
+            trf_list = get_trfs_set(trf_file)
+            mirna_list = get_miRNA_set(mirna_file)
+
+            print('Building the genes for tRFs...')
+            genes_dict_trf = check_genes_for_tRFs(trf_list)
+            print('Building the genes for miRNAs...')
+            genes_dict_mirna = check_genes_for_miRNAs(mirna_list)
+
+            for trf in genes_dict_trf:
+                for gene in genes_dict_trf[trf]:
+                    if gene[0] not in gene_dict_of_all:
+                        gene_dict_of_all[gene[0]] = []
+                    gene_dict_of_all[gene[0]].append((trf, gene[1]))
+            for mirna in genes_dict_mirna:
+                for gene in genes_dict_mirna[mirna]:
+                    if gene[0] not in gene_dict_of_all:
+                        gene_dict_of_all[gene[0]] = []
+                    gene_dict_of_all[gene[0]].append((mirna, gene[1]))
+
+            ### Save the results to a file if needed ###
+            df = pd.DataFrame(columns=['gene', 'miRNA/tRF', 'name','score'])
+            for gene in gene_dict_of_all:
+                for name in gene_dict_of_all[gene]:
+                    if 'tRF' in name[0]:
+                        new_row = {'gene': gene, 'miRNA/tRF': 'tRF', 'name': name[0], 'score': name[1]}
+                    else:
+                        new_row = {'gene': gene, 'miRNA/tRF': 'miRNA', 'name': name[0], 'score': name[1]}
+                    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            df.to_csv('conclusion_genes.csv', index=False)
+
+        else:
+            raise ValueError('Invalid choice. Please enter a valid choice.')
+
+    finally:
+        # Stop the spinner and wait for the thread to finish
+        stop_event.set()
+        spinner_thread.join()
+        print('\nProcessing completed successfully :) ')
+
+
+
+            
 
