@@ -1,0 +1,10 @@
+# Python libraries
+pandas==2.1.1
+numpy==1.24.4
+selenium==4.12.1
+threading==1.0
+multiprocessing==0.70
+chromedriver-autoinstaller==0.6.0
+
+# Ensure that Chrome browser and ChromeDriver are installed for Selenium
+# You can use chromedriver-autoinstaller to automatically download the correct version of ChromeDriver.

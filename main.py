@@ -14,6 +14,8 @@ import warnings
 import multiprocessing as mp
 import time
 
+TIME_WAIT = 3
+
 def get_trfs_set(file_path):
     """
     Get the list of tRFs from the given file.
@@ -65,7 +67,7 @@ def check_genes_for_tRFs(tRFs,output_file='conclusion_TRFs_genes', if_save=False
 
     #push the search button-<button id="nav-search" class="btn orange-hover no-outline-focus text-white flex-fill">SEARCH</button>
     driver.find_element(By.ID, 'nav-search').click() 
-    time.sleep(2)
+    time.sleep(TIME_WAIT)
 
     #put all the trfs in the search box- <textarea id="search-tRF-textarea" class="form-control text-monospace" placeholder="Input tRF MINTBase IDs/sequences here." rows="24"></textarea>
     search_box = driver.find_element(By.ID, 'search-tRF-textarea')
@@ -85,7 +87,7 @@ def check_genes_for_tRFs(tRFs,output_file='conclusion_TRFs_genes', if_save=False
 
 
     driver.find_element(By.ID, 'search-btn').click()
-    time.sleep(2)
+    time.sleep(TIME_WAIT)
 
     original_window = driver.current_window_handle
     windows = driver.window_handles
@@ -97,7 +99,7 @@ def check_genes_for_tRFs(tRFs,output_file='conclusion_TRFs_genes', if_save=False
     try:
         driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div[1]/div[3]/div[1]/span[2]/span/button/span[1]').click()
         driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div[1]/div[3]/div[1]/span[2]/span/div/a[4]').click()
-        time.sleep(2)
+        time.sleep(TIME_WAIT)
         page = 2
         number_of_pages = driver.find_element(By.CLASS_NAME, 'pagination-info').text.split()[-2]
         number_of_pages = (int(number_of_pages)//100 if int(number_of_pages) % 100 == 0 else int(number_of_pages)//100 + 1)
@@ -119,7 +121,7 @@ def check_genes_for_tRFs(tRFs,output_file='conclusion_TRFs_genes', if_save=False
                     break
             page += 1
             driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div[1]/div[3]/div[2]/ul/li[' + str(page) + ']/a').click()
-            time.sleep(2)
+            time.sleep(TIME_WAIT)
     
     except:
         page = 1
@@ -176,7 +178,7 @@ def check_genes_for_miRNAs(miRNAs, output_file='conclusion_miRNAs_genes', if_sav
     before_download = set(os.listdir(current_dir))
     driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[2]/input[2]').click()
     driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[1]/input[3]').click() #download the txt file
-    time.sleep(5)
+    time.sleep(TIME_WAIT*3)
     after_download = set(os.listdir(current_dir))
 
     new_files = after_download - before_download
@@ -282,9 +284,7 @@ if __name__ == '__main__':
             trf_list = get_trfs_set(trf_file)
             mirna_list = get_miRNA_set(mirna_file)
 
-            print('Building the genes for tRFs...')
             genes_dict_trf = check_genes_for_tRFs(trf_list)
-            print('Building the genes for miRNAs...')
             genes_dict_mirna = check_genes_for_miRNAs(mirna_list)
 
             for trf in genes_dict_trf:
