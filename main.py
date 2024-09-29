@@ -144,7 +144,7 @@ def check_genes_for_tRFs(tRFs,output_file='conclusion_TRFs_genes', if_save=False
             for gene in genes_dict[trf]:
                 new_row = {'tRF': trf, 'gene': gene[0], 'score': gene[1]}
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        df.to_csv(output_file, index=False)
+        df.to_csv(output_file + '.csv', index=False)
 
     return genes_dict
 
@@ -171,27 +171,46 @@ def check_genes_for_miRNAs(miRNAs, output_file='conclusion_miRNAs_genes', if_sav
     driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[1]/input[3]').click()
 
     ### Download the file and save it as a csv file ###
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    prefs = {"download.default_directory": current_dir} #set the download directory. CHANGE THIS TO YOUR DESIRED DIRECTORY
+    current_dir = os.path.abspath(os.getcwd())
+    prefs = {"download.default_directory": current_dir,  # your custom directory
+         "download.prompt_for_download": False,      # avoid the download prompt
+         "download.directory_upgrade": True}  #set the download directory. CHANGE THIS TO YOUR DESIRED DIRECTORY
     chrome_options.add_experimental_option("prefs", prefs)
 
-    before_download = set(os.listdir(current_dir))
-    driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[2]/input[2]').click()
-    driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[1]/input[3]').click() #download the txt file
-    time.sleep(TIME_WAIT*3)
-    after_download = set(os.listdir(current_dir))
+    try: #click the download button and download the file to the current directory
+        before_download = set(os.listdir(current_dir))
+        driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[2]/input[2]').click()
+        driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[1]/input[3]').click() #download the txt file
+        time.sleep(TIME_WAIT*3)
+        after_download = set(os.listdir(current_dir))
 
-    new_files = after_download - before_download
-    downloaded_file = new_files.pop()
-    target_name = "mirDIP_result.txt"  # Rename the file to a new name
-    os.rename(os.path.join(current_dir, downloaded_file), os.path.join(current_dir, target_name))
-    lines_to_skip = 1
-    for line in open(target_name):
-        if line.startswith('Results'):
-            break
-        lines_to_skip += 1
-    df = pd.read_csv(target_name, sep='\t', skiprows= lines_to_skip)
-    df.to_csv('mirDIP_result.csv', index=False)
+        new_files = after_download - before_download
+        downloaded_file = new_files.pop()
+        target_name = "mirDIP_result.txt"  # Rename the file to a new name
+        os.rename(os.path.join(current_dir, downloaded_file), os.path.join(current_dir, target_name))
+        lines_to_skip = 1
+        for line in open(target_name):
+            if line.startswith('Results'):
+                break
+            lines_to_skip += 1
+        df = pd.read_csv(target_name, sep='\t', skiprows= lines_to_skip)
+        df.to_csv('mirDIP_result.csv', index=False)
+    except: #if the download fails, print the instructions to download the file manually
+        print('Follow the next steps manually to download the file.')
+        driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[2]/input[2]').click()
+        driver.find_element(By.XPATH,'/html/body/div[2]/div/form/div[3]/table/tbody/tr/td/div[1]/input[3]').click() #download the txt file
+        time.sleep(TIME_WAIT*3)
+        print('Go to the download folder and rename the downloaded file to mirDIP_result.txt')
+        print('Move the file to the current directory and press enter to continue.')
+        while True:
+            if input() == '':
+                break
+            if os.path.exists('mirDIP_result.txt'):
+                print('File found.')
+                break
+            else:
+                print('File not found. Please check the file name and try again.')
+                print('Press enter to continue.')
 
     ### Read the csv file and get the genes for each miRNA after filtering ###
     df = pd.read_csv('mirDIP_result.csv')
