@@ -224,7 +224,8 @@ def check_genes_for_miRNAs(miRNAs, output_file='conclusion_miRNAs_genes', if_sav
         if miRNA not in genes_dict:
             genes_dict[miRNA] = []
         genes_dict[miRNA].append((gene, score))
-    os.remove(target_name)
+    if os.path.exists(target_name):
+        os.remove(target_name)
     os.remove('mirDIP_result.csv')
 
     ### Save the results to a file if needed ###
