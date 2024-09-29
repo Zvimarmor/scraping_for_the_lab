@@ -14,7 +14,7 @@ import warnings
 import multiprocessing as mp
 import time
 
-TIME_WAIT = 3
+TIME_WAIT = 5
 
 def get_trfs_set(file_path):
     """
@@ -211,6 +211,13 @@ def check_genes_for_miRNAs(miRNAs, output_file='conclusion_miRNAs_genes', if_sav
             else:
                 print('File not found. Please check the file name and try again.')
                 print('Press enter to continue.')
+        lines_to_skip = 1
+        for line in open('mirDIP_result.txt'):
+            if line.startswith('Results'):
+                break
+            lines_to_skip += 1
+        df = pd.read_csv('mirDIP_result.txt', sep='\t', skiprows= lines_to_skip)
+        df.to_csv('mirDIP_result.csv', index=False)
 
     ### Read the csv file and get the genes for each miRNA after filtering ###
     df = pd.read_csv('mirDIP_result.csv')
@@ -226,7 +233,8 @@ def check_genes_for_miRNAs(miRNAs, output_file='conclusion_miRNAs_genes', if_sav
         genes_dict[miRNA].append((gene, score))
     if os.path.exists(target_name):
         os.remove(target_name)
-    os.remove('mirDIP_result.csv')
+    if os.path.exists('mirDIP_E_2024_09_29_07_28_04.txt'):
+        os.remove('mirDIP_E_2024_09_29_07_28_04.txt')
 
     ### Save the results to a file if needed ###
     if if_save:
